@@ -1,0 +1,26 @@
+### 1. Criar um Usuário
+POST http://localhost:8080/api/v1/users
+Content-Type: application/json
+
+{
+  "username": "arthur",
+  "name": "Arthur Kenji",
+  "password": "123",
+  "email": "arthur@gmail.com"
+}
+
+### 2. (OPCIONAL) Ver se o usuário foi criado
+GET http://localhost:8080/api/v1/users
+
+### 3. Criar uma Tarefa (IMPORTANTE: TROQUE O ID ABAIXO PELO ID QUE VOCÊ RECEBER NO PASSO 1)
+POST http://localhost:8080/api/v1/tasks
+Content-Type: application/json
+
+{
+  "title": "Estudar Java",
+  "description": "Terminar o curso de Spring Boot",
+  "priority": "Alta",
+  "user": {
+    "id": "COLE_O_ID_AQUI_DENTRO_DAS_ASPAS"
+  }
+}
