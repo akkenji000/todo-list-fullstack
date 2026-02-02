@@ -5,7 +5,7 @@ import './App.css'
 function App() {
   const [tasks, setTasks] = useState([])
   
-  // 1. Estados para o formulário (input do usuário)
+  // Estados para o formulário (input do usuário)
   const [titulo, setTitulo] = useState('')
   const [descricao, setDescricao] = useState('')
   const [prioridade, setPrioridade] = useState('Baixa')
@@ -25,7 +25,7 @@ function App() {
     fetchTasks()
   }, [])
 
-  // 2. Função para criar nova tarefa
+  // Função para criar nova tarefa
   const adicionarTarefa = async (e) => {
     e.preventDefault() // Evita que a página recarregue
 
@@ -35,7 +35,7 @@ function App() {
         description: descricao,
         priority: prioridade,
         user: { 
-          // ⚠️ IMPORTANTE: Cole o ID do seu usuário aqui!
+          //IMPORTANTE: Cole o ID do seu usuário aqui!
           id: "69796bf8298bfe3ba7bff11c" 
         }
       })
@@ -48,7 +48,31 @@ function App() {
 
     } catch (error) {
       console.error("Erro ao criar tarefa:", error)
-      alert('Erro ao criar tarefa. O Backend está ligado?')
+      alert('Erro ao criar tarefa. Checar o backend.')
+    }
+  }
+  // Função para atualizar status da tarefa
+  const toggleTarefa = async (task) => {
+    try {
+      await axios.patch(`http://localhost:8080/api/v1/tasks/${task.id}/completed`, {
+        completed: !task.completed
+      })
+      fetchTasks() // Recarrega a lista
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error)
+    }
+  }
+
+  // Função de deletar tarefa
+  const deletarTarefa = async (Id) => {
+    // Confirmação de deleção
+    if (confirm('Tem certeza que deseja deletar esta tarefa?')) {
+      try {
+        await axios.delete(`http://localhost:8080/api/v1/tasks/${Id}`)
+        fetchTasks() // Recarrega a lista
+      } catch (error) {
+        console.error("Erro ao deletar tarefa:", error)
+      }
     }
   }
 
@@ -100,18 +124,53 @@ function App() {
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {tasks.map(task => (
           <li key={task.id} style={{ 
-            background: '#f4f4f4', 
-            color: '#333',
+            // Estilo Condicional: Se completou, fica cinza. Se não, branco.
+            background: task.completed ? '#e0e0e0' : '#f4f4f4', 
+            color: task.completed ? '#888' : '#333',
             margin: '10px 0', 
             padding: '15px',
             borderRadius: '4px',
-            borderLeft: task.priority === 'Alta' ? '5px solid red' : '5px solid #646cff'
+            // Mantém a borda colorida da prioridade
+            borderLeft: task.priority === 'Alta' ? '5px solid red' : '5px solid #646cff',
+            // Layout Flex para alinhar itens
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            <h3 style={{ margin: '0 0 5px 0' }}>{task.title}</h3>
-            <p style={{ margin: 0 }}>{task.description}</p>
-            <small style={{ display: 'block', marginTop: '10px', fontWeight: 'bold' }}>
-              Prioridade: {task.priority}
-            </small>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              {/* O CHECKBOX NOVO */}
+              <input 
+                type="checkbox" 
+                checked={task.completed || false} 
+                onChange={() => toggleTarefa(task)}
+                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+              />
+
+              {/* TEXTOS DA TAREFA */}
+              <div>
+                <h3 style={{ 
+                  margin: '0 0 5px 0', 
+                  // Risca o texto se estiver concluído
+                  textDecoration: task.completed ? 'line-through' : 'none' 
+                }}>
+                  {task.title}
+                </h3>
+                <p style={{ margin: 0 }}>{task.description}</p>
+                <small style={{ fontWeight: 'bold' }}>Prioridade: {task.priority}</small>
+              </div>
+            </div>
+
+            {/* BOTÃO DELETAR NOVO */}
+            <button 
+              onClick={() => deletarTarefa(task.id)}
+              style={{ 
+                background: '#ff4444', color: 'white', border: 'none', 
+                padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' 
+              }}
+            >
+              Excluir
+            </button>
           </li>
         ))}
       </ul>
